@@ -1,0 +1,201 @@
+{% load i18n thaidate %}
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>การประชุมคณะกรรมการป่าชุมชน</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        
+        .table thead th {
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .table td, .table th {
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        /* Align specific columns */
+        .text-left {
+            text-align: left !important;
+        }
+        .text-right {
+            text-align: right !important;
+        }
+        /* Responsive Scrolling */
+        .table-responsive {
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body class="container py-4">
+
+    <h3 class="text-center text-primary">การประชุมคณะกรรมการป่าชุมชนประจำจังหวัด ประจำปีงบประมาณ {{ fiscal_year }}</h3>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr class="text-center">
+                    <th rowspan="2">ลำดับที่</th>
+                    <th rowspan="2">จังหวัด</th>
+                    <th rowspan="2">เลขานุการคณะกรรมการป่าชุมชน</th>
+                    <th rowspan="2">แผน/ผล</th>
+                    <th colspan="3">ผล</th>
+                    <th colspan="3">การส่งรายงานการประชุม</th>
+                    <th rowspan="2">หมายเหตุ</th>
+                </tr>
+                <tr>
+                    <th>ครั้งที่ 1</th>
+                    <th>ครั้งที่ 2</th>
+                    <th>ครั้งที่ 3</th>
+                    <th>ครั้งที่ 1</th>
+                    <th>ครั้งที่ 2</th>
+                    <th>ครั้งที่ 3</th>                    
+                </tr>
+            </thead>
+            <tbody>
+                {% for section in sections %}
+                <tr class="table-primary">
+                    <td colspan="11" class="text-left"><strong>{{ section.name }}</strong></td>
+                </tr>
+                    {% for department in section.departments.all %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ department.province }}</td>
+                        <td class="text-left">{{ department.responsible }}</td>
+                        <td>{{ department.get_current_fiscal_objective.meeting_number  }} / {{ department.get_fiscal_meeting.count }}</td>                        
+                        <td>
+                            {% if department.get_fiscal_meeting.0 %}
+                                {%if department.get_fiscal_meeting.0.status == 'P' %}
+                                    📅
+                                {% elif department.get_fiscal_meeting.0.status == 'D' %}
+                                    ⌛  
+                                {% else %}
+                                    ✔
+                                {% endif %}
+                                {% language 'th' %}
+                                    {{ department.get_fiscal_meeting.0.meeting_date|thaidate:"d M y"|default_if_none:""  }}
+                                {% endlanguage %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if department.get_fiscal_meeting.1 %}
+                                {%if department.get_fiscal_meeting.1.status == 'P' %}
+                                    📅
+                                {% elif department.get_fiscal_meeting.1.status == 'D' %}
+                                    ⌛  
+                                {% else %}
+                                    ✔
+                                {% endif %}
+                                {% language 'th' %}
+                                    {{ department.get_fiscal_meeting.1.meeting_date|thaidate:"d M y"|default_if_none:""  }}
+                                {% endlanguage %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if department.get_fiscal_meeting.2 %}
+                                {%if department.get_fiscal_meeting.2.status == 'P' %}
+                                    📅
+                                {% elif department.get_fiscal_meeting.2.status == 'D' %}
+                                    ⌛  
+                                {% else %}
+                                    ✔
+                                {% endif %}
+                                {% language 'th' %}
+                                    {{ department.get_fiscal_meeting.2.meeting_date|thaidate:"d M y"|default_if_none:""  }}
+                                {% endlanguage %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if department.get_fiscal_meeting.0 %}
+                                {%if department.get_fiscal_meeting.0.form2_file%}
+                                    ✔
+                                {% endif %}
+                                {%if department.get_fiscal_meeting.0.report_file%}
+                                    ✔
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if department.get_fiscal_meeting.1 %}
+                                {%if department.get_fiscal_meeting.1.form2_file%}
+                                    ✔
+                                {% endif %}
+                                {%if department.get_fiscal_meeting.1.report_file%}
+                                    ✔
+                                {% endif %}
+                            {% endif %}
+
+                        </td>
+                        <td>
+                            {% if department.get_fiscal_meeting.2 %}
+                                {%if department.get_fiscal_meeting.2.form2_file%}
+                                    ✔
+                                {% endif %}
+                                {%if department.get_fiscal_meeting.2.report_file%}
+                                    ✔
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if  department.get_fiscal_meeting.count > 3 %}
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#meetingModal">
+                                    เพิ่มเติม
+                                </button>
+                            {% elif department.get_fiscal_meeting.count < department.get_current_fiscal_objective.meeting_number%}
+                                <span class="badge rounded-pill bg-danger">ต่ำกว่าแผน</span>
+                                {% comment %} <span class="badge bg-info text-dark">เกินแผน</span> {% endcomment %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="modal fade" id="meetingModal" tabindex="-1" aria-labelledby="meetingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="meetingModalLabel">รายละเอียดการประชุมคณะกรรมการป่าชุมชน จังหวัดนครพนม</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                      <tr>                        
+                        <th scope="col">ครั้งที่</th>
+                        <th scope="col">วันที่ประชุม</th>
+                        <th scope="col">สถานะ</th>
+                        <th scope="col">ไฟล์ กม.2</th>
+                        <th scope="col">รายงานการประชุม</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>                        
+                        <td>4</td>
+                        <td>2023-10-01</td>
+                        <td>แผน</td>
+                        <td>✔</td>
+                        <td>✔</td>                        
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary float-right" data-bs-dismiss="modal">Close</button>
+                </div>
+          </div>
+        </div>
+      </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
