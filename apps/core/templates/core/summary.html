@@ -35,40 +35,64 @@
 </head>
 <body class="container py-4">
 
-    <h3 class="text-center text-primary">การประชุมคณะกรรมการป่าชุมชนประจำจังหวัด ประจำปีงบประมาณ {{ fiscal_year }}</h3>
+    <h3 class="text-primary">การประชุมคณะกรรมการป่าชุมชนประจำจังหวัด ประจำปีงบประมาณ {{ fiscal_year }}</h3>
 
-    <div class="table-responsive">
+	<div class="row">
+	<div class="col-6 ms-auto">
+    <form class="d-flex align-items-center">
+        <!-- Search Input -->
+        <input type="text" name="q" class="form-control me-2" placeholder="Search..." aria-label="Search">
+
+        <!-- Year Select Dropdown -->
+        <select class="form-select me-2" aria-label="Select Year">
+            <option selected disabled>Select Year</option>
+            <option value="2564">2564</option>
+            <option value="2565">2565</option>
+            <option value="2566">2566</option>
+            <option value="2567">2567</option>
+            <option value="2568">2568</option>
+        </select>
+
+        <!-- Go Button -->
+        <button class="btn btn-primary" type="submit">Go</button>
+    </form>
+	</div>
+	</div>
+
+    <div class="table-responsive mt-2">
         <table class="table table-bordered table-hover">
-            <thead>
-                <tr class="text-center">
-                    <th rowspan="2">ลำดับที่</th>
-                    <th rowspan="2">จังหวัด</th>
-                    <th rowspan="2">เลขานุการคณะกรรมการป่าชุมชน</th>
-                    <th rowspan="2">แผน/ผล</th>
+
+            <tbody>
+                {% for section in sections %}
+				<tr><td  colspan="15"></td></tr>            
+				<tr class="table-primary">
+                    <th colspan="5" style="text-align: left;">{{ section.name }}</th>
+
                     <th colspan="3">ผล</th>
-                    <th colspan="3">การส่งรายงานการประชุม</th>
+                    <th colspan="6">การส่งรายงานการประชุม</th>
                     <th rowspan="2">หมายเหตุ</th>
                 </tr>
-                <tr>
+                <tr class="table-primary">
+			        <th >ลำดับที่</th>
+                    <th >จังหวัด</th>
+                    <th >เลขานุการคณะกรรมการป่าชุมชน</th>
+			        <th >แผน</th>
+					<th>ผล</th>
                     <th>ครั้งที่ 1</th>
                     <th>ครั้งที่ 2</th>
                     <th>ครั้งที่ 3</th>
-                    <th>ครั้งที่ 1</th>
-                    <th>ครั้งที่ 2</th>
-                    <th>ครั้งที่ 3</th>                    
+                    <th colspan=2>ครั้งที่ 1</th>
+                    <th colspan=2>ครั้งที่ 2</th>
+                    <th colspan=2>ครั้งที่ 3</th>                    
                 </tr>
-            </thead>
-            <tbody>
-                {% for section in sections %}
-                <tr class="table-primary">
-                    <td colspan="11" class="text-left"><strong>{{ section.name }}</strong></td>
-                </tr>
+                
                     {% for department in section.departments.all %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ department.province }}</td>
                         <td class="text-left">{{ department.responsible }}</td>
-                        <td>{{ department.get_current_fiscal_objective.meeting_number  }} / {{ department.get_fiscal_meeting.count }}</td>                        
+                        <td>{{ department.get_current_fiscal_objective.meeting_number  }} </td>
+						<td>{{ department.get_fiscal_meeting.count }}</td>                        
                         <td>
                             {% if department.get_fiscal_meeting.0 %}
                                 {%if department.get_fiscal_meeting.0.status == 'P' %}
@@ -116,6 +140,10 @@
                                 {%if department.get_fiscal_meeting.0.form2_file%}
                                     ✔
                                 {% endif %}
+							{% endif %}
+						</td>
+						<td>
+							{% if department.get_fiscal_meeting.2 %}
                                 {%if department.get_fiscal_meeting.0.report_file%}
                                     ✔
                                 {% endif %}
@@ -126,6 +154,10 @@
                                 {%if department.get_fiscal_meeting.1.form2_file%}
                                     ✔
                                 {% endif %}
+							{% endif %}
+						</td>
+						<td>
+							{% if department.get_fiscal_meeting.2 %}
                                 {%if department.get_fiscal_meeting.1.report_file%}
                                     ✔
                                 {% endif %}
@@ -137,6 +169,10 @@
                                 {%if department.get_fiscal_meeting.2.form2_file%}
                                     ✔
                                 {% endif %}
+							{% endif %}
+						</td>
+						<td>
+							{% if department.get_fiscal_meeting.2 %}
                                 {%if department.get_fiscal_meeting.2.report_file%}
                                     ✔
                                 {% endif %}

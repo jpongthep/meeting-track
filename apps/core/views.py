@@ -9,6 +9,7 @@ def summary(request, year = 2567):
     config_fiscal_year = Config.objects.get(key = "fiscal-year")
     config_fiscal_year.value = year
     config_fiscal_year.save()
+
     
     context = {
         'sections': sections,
