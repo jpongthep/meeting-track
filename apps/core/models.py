@@ -26,9 +26,6 @@ class Section(models.Model):
     
 
 class Department(models.Model):
-    """
-    Department model with additional contact and comment fields, plus a ForeignKey to Section.
-    """
     section = models.ForeignKey(Section, verbose_name="สำนัก",  on_delete=models.CASCADE, related_name='departments')
     
     province = models.CharField(verbose_name="จังหวัด", max_length=100)    
@@ -72,9 +69,6 @@ class FiscalObjective(models.Model):
 
 
 class Meeting(models.Model):
-    """
-    Meeting model with updated meeting date fields and a status field.
-    """
     department = models.ForeignKey(Department, verbose_name = "จังหวัด", on_delete=models.CASCADE, related_name='meetings')
     fiscal_year = models.IntegerField(verbose_name="ปีงบประมาณ", default=2568)
     number = models.IntegerField(verbose_name="ครั้งที่", default= 1)
@@ -88,18 +82,23 @@ class Meeting(models.Model):
     summary = models.TextField()
     
     STATUS_CHOICES = [
-        ('P', 'แผน'),
-        ('D', 'ดำเนินการแล้ว'),
-        ('A', 'ตรวจสอบแล้ว'),
+        ('P', 'ยังไม่ดำเนินการ'),
+        ('A', 'ดำเนินการแล้ว'),
     ]
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='P')
     
     class Meta:
         verbose_name  = verbose_name_plural = '4. รายละเอียดการประชุม'
-        ordering = ['meeting_date', ]
+        ordering = ['fiscal_year', 'meeting_date', ]
     
     def __str__(self):
         return f"{self.department.province} - {self.fiscal_year%100}-{self.number}"
+
+    def get_plan(self):
+        try:
+            return FiscalObjective.objects.filter(department=self.department, fiscal_year=self.fiscal_year).first().meeting_number
+        except:
+            return "-"
     
 
     

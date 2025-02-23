@@ -3,11 +3,12 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 
-from apps.core.views import summary
+from apps.core.views import summary, export_meetings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('summary/<year>/', summary, name='summary'),
+    path('', summary, name='summary'),
+    path('export-meetings/', export_meetings, name='export-meetings'),
 ]
 
 
