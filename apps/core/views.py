@@ -103,53 +103,38 @@ def export_meetings(request):
     meetings = meetings.order_by("department__section__type", "department__section__number",  "department_id", "fiscal_year", "number")
             
     row_num = 3
-    last_section = ''
-    last_province = ''
     
+    last_section = None
+    last_province = None
+
     for meeting in meetings:
-        section_name = meeting.department.section.name
-        department_name = meeting.department.province
-        province = meeting.department.province
+        department = meeting.department
+        section_name = department.section.name
+        province = department.province
         fiscal_year = meeting.fiscal_year
-        try:
-            meeting_plan = FiscalObjective.objects.filter(department=meeting.department, fiscal_year=fiscal_year).first().meeting_number
-        except:
-            meeting_plan = 0
-        meeting_number = meeting.number
-        meeting_date = meeting.meeting_date
-        form2_file = "✔" if meeting.form2_file else '-'
-        report_file = "✔" if meeting.report_file else '-'
-        comment = meeting.summary
         
-        if last_section == section_name: 
-            section_name = ''
-        else:
-            last_section = section_name                        
-            
-        if last_province == province: 
-            province = ''
-            meeting_plan =''
-        else:
-            last_province = province
-            
-            
+        meeting_plan = FiscalObjective.objects.filter(department=department, fiscal_year=fiscal_year).first()
+        meeting_plan = meeting_plan.meeting_number if meeting_plan else 0
+                
         row_data = [
-            section_name, 
-            province, 
-            f"25{fiscal_year}" if meeting_number == 1 else '', 
-            meeting_plan, 
-            f"{fiscal_year}-{meeting_number}", 
-            thai_date(meeting_date), 
-            form2_file, 
-            report_file, 
-            comment
+            section_name if last_section != section_name else '',
+            province if last_province != province else '',
+            f"25{fiscal_year}" if meeting.number == 1 else '',
+            meeting_plan if last_province != province else '',
+            f"{fiscal_year}-{meeting.number}",
+            thai_date(meeting.meeting_date),
+            "✔" if meeting.form2_file else '-',
+            "✔" if meeting.report_file else '-',
+            meeting.summary
         ]
         
-        for col_num, value in enumerate(row_data, 1):
-            col_letter = get_column_letter(col_num)
-            sheet[f'{col_letter}{row_num}'] = value
+        last_section = section_name
+        last_province = province
         
-        row_num += 1
+        for col_num, value in enumerate(row_data, 1):
+            sheet[f'{get_column_letter(col_num)}{row_num}'] = value
+        
+        row_num += 1   
 
     meetings =  meetings.filter(status = "A")
     
@@ -164,9 +149,9 @@ def export_meetings(request):
         cell = summary_sheet.cell(row=3 + i, column=2)  
         cell.value = value
 
-    cell = summary_sheet.cell(row= 3+len(meeting_summary), column=1)  
+    cell = summary_sheet.cell(row= 3 + len(meeting_summary), column=1)  
     cell.value = "รวม"
-    cell = summary_sheet.cell(row= 3+len(meeting_summary), column=2)  
+    cell = summary_sheet.cell(row= 3 + len(meeting_summary), column=2)  
     cell.value = sum(meeting_summary)
         
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')

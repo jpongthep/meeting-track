@@ -55,8 +55,6 @@
             color: yellow;
         }
 
-
-
     </style>
 </head>
 <body class="container py-4">
@@ -96,17 +94,15 @@
 	<div class="col-6 ms-auto">
     <form class="d-flex align-items-center">
         <!-- Search Input -->
-        <input type="text" name="section" class="form-control me-2" placeholder="ค้นหา ลำดับ สำนัก" aria-label="Search" value="{{ request.GET.section|default_if_none:"" }}">
-        <input type="text" name="q" class="form-control me-2" placeholder="ค้นหา จังหวัด" aria-label="Search" value="{{ request.GET.q|default_if_none:"" }}">
+        <input type="text" name="section" class="form-control me-2" list="sectionList" placeholder="ค้นหา ลำดับ สำนัก" aria-label="Search" value="{{ request.GET.section|default_if_none:"" }}">
 
+        <datalist id="sectionList"><option value="เชียงใหม่"><option value="เชียงราย"><option value="ลำปาง"><option value="ตาก"><option value="สระบุรี"><option value="อุดรธานี"><option value="ขอนแก่น"><option value="นครราชสีมา"><option value="ชลบุรี"><option value="ราชบุรี"><option value="สุราษฎร์ธานี"><option value="นครศรีธรรมราช"><option value="สงขลา"><option value="แม่ฮ่องสอน"><option value="แพร่"><option value="นครสวรรค์"><option value="พิษณุโลก"><option value="นครพนม"><option value="อุบลราชธานี"><option value="ปราจีนบุรี"><option value="เพชรบุรี"><option value="กระบี่"><option value="นราธิวาส"></datalist>
+        <input type="text" name="q" class="form-control me-2" placeholder="ค้นหา จังหวัด"  aria-label="Search" value="{{ request.GET.q|default_if_none:"" }}"  list="provinceOptions">
+        
+        <datalist id="provinceOptions"><option value="เชียงใหม่"><option value="ลำพูน"><option value="แม่ฮ่องสอน"><option value="เชียงราย"><option value="พะเยา"><option value="ลำปาง"><option value="อุตรดิตถ์"><option value="แพร่"><option value="น่าน"><option value="ตาก"><option value="สุโขทัย"><option value="กำแพงเพชร"><option value="นครสวรรค์"><option value="พิจิตร"><option value="อุทัยธานี"><option value="พิษณุโลก"><option value="เพชรบูรณ์"><option value="สระบุรี"><option value="ลพบุรี"><option value="ชัยนาท"><option value="สิงห์บุรี"><option value="อุดรธานี"><option value="หนองบัวลำภู"><option value="หนองคาย"><option value="เลย"><option value="บึงกาฬ"><option value="นครพนม"><option value="สกลนคร"><option value="ขอนแก่น"><option value="กาฬสินธุ์"><option value="มหาสารคาม"><option value="ร้อยเอ็ด"><option value="มุกดาหาร"><option value="อุบลราชธานี"><option value="อำนาจเจริญ"><option value="ยโสธร"><option value="ศรีสะเกษ"><option value="นครราชสีมา"><option value="สุรินทร์"><option value="บุรีรัมย์"><option value="ชัยภูมิ"><option value="ชลบุรี"><option value="ระยอง"><option value="จันทบุรี"><option value="ตราด"><option value="ปราจีนบุรี"><option value="สระแก้ว"><option value="ฉะเชิงเทรา"><option value="นครนายก"><option value="ราชบุรี"><option value="กาญจนบุรี"><option value="สุพรรณบุรี"><option value="เพชรบุรี"><option value="ประจวบคีรีขันธ์"><option value="สุราษฎร์ธานี"><option value="ชุมพร"><option value="ระนอง"><option value="นครศรีธรรมราช"><option value="ตรัง"><option value="พัทลุง"><option value="กระบี่"><option value="พังงา"><option value="ภูเก็ต"><option value="สงขลา"><option value="สตูล"><option value="ปัตตานี"><option value="นราธิวาส"><option value="ยะลา"></datalist>
+ 
         <!-- Year Select Dropdown -->
-        <select class="form-select me-2" aria-label="Select Year" length="6" name="year">
-            <option value="all" selected>ทุกปี</option>
-            <option value="64" {% if request.GET.year == "64" %}selected{% endif %}>64</option>
-            <option value="65" {% if request.GET.year == "65" %}selected{% endif %}>65</option>
-            <option value="66" {% if request.GET.year == "66" %}selected{% endif %}>66</option>
-            <option value="67" {% if request.GET.year == "67" %}selected{% endif %}>67</option>
-            <option value="68" {% if request.GET.year == "68" %}selected{% endif %}>68</option>
+        <select class="form-select me-2" aria-label="Select Year" length="6" name="year"><option value="all" selected>ทุกปี</option><option value="64" {% if request.GET.year == "64" %}selected{% endif %}>64</option><option value="65" {% if request.GET.year == "65" %}selected{% endif %}>65</option><option value="66" {% if request.GET.year == "66" %}selected{% endif %}>66</option><option value="67" {% if request.GET.year == "67" %}selected{% endif %}>67</option><option value="68" {% if request.GET.year == "68" %}selected{% endif %}>68</option>
         </select>
 
         <!-- Go Button -->
