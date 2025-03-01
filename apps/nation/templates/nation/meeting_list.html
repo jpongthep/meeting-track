@@ -1,0 +1,88 @@
+{% extends "_base.html" %}
+
+{% load i18n thaidate %}
+
+{% block title %}การประชุมระดับชาติ{% endblock %}
+
+{% block content %}
+<h3 class="text-primary">คณะกรรมการนโยบายป่าชุมชน</h3>
+
+<div class="row mt-4">
+    <div class="col-6 mb-2">
+        <div class="card px-1">
+            <div class="card-body">
+                <h5>รายการการประชุมฯ</h5>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ปี</th>
+                            <th>ครั้งที่</th>
+                            <th>ชื่อ</th>
+                            <th>วันที่ประชุม</th>
+                            <th>รายงานการประชุม</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for meeting in meetings %}
+                        <tr>
+                            <td>{{ meeting.fiscal_year }}</td>
+                            <td>{{ meeting.number }}</td>
+                            <td class="text-start">
+                                {{ meeting.name }}
+                            </td>
+                            <td>{% language 'th' %}{{ meeting.meeting_date|thaidate:"d M y" }}{% endlanguage %}</td>
+                            <td class="text-start">
+                                
+                                {% if meeting.file %}
+                                    <a href="{{ meeting.file.url }}" target="_blank"><i class="bi bi-file-earmark-text ms-2"></i></a>
+                                    {{ meeting.file.size|filesizeformat }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 mb-2">
+        <div class="card px-1">
+            <div class="card-body">
+                <h5>คำสั่งฯ</h5>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>เลขที่</th>
+                            <th>ชื่อ</th>
+                            <th>วันลงนาม</th>
+                            <th>File</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for command in commands %}
+                        <tr>
+                            <td>{{ command.year_number }}</td>
+                            <td class="text-start">
+                                {{ command.name }}
+                            </td>
+                            <td>{% language 'th' %}{{ command.date|thaidate:"d M y" }}{% endlanguage %}</td>
+                            <td>
+                                {% if command.file %}
+                                    <a href="{{ command.file.url }}" target="_blank"><i class="bi bi-file-earmark-text ms-2"></i></a>
+                                    {{ command.file.size|filesizeformat }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,12 +1,12 @@
+from datetime import date
+
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from apps.configs.models import Config
 
 
 class Section(models.Model):
-    """
-    Represents a section to which a Department belongs.
-    """
     name = models.CharField(verbose_name="สำนัก", max_length=100)
     number = models.IntegerField(verbose_name="ลำดับที่",)
     type = models.CharField(verbose_name="ประเภท", max_length=1, choices=[('M', 'หลัก'), ('S', 'สาขา')], default='M')
@@ -49,12 +49,8 @@ class Department(models.Model):
         year = int(Config.objects.get(key = "fiscal-year").value)
         return self.meetings.filter(fiscal_year=year).all()
     
-    
 
 class FiscalObjective(models.Model):
-    """
-    Fiscal Objective model with a ForeignKey to Department.
-    """
     department = models.ForeignKey(Department, verbose_name = "จังหวัด", on_delete=models.CASCADE, related_name='fiscal_objectives')
     fiscal_year = models.IntegerField(verbose_name="ปีงบประมาณ", default=2568)
     meeting_number = models.PositiveIntegerField(verbose_name="แผนการประชุม (ครั้ง)",default=1)
@@ -66,7 +62,7 @@ class FiscalObjective(models.Model):
     def __str__(self):
         return f"{self.department.province} - {self.fiscal_year}"
 
-
+    
 
 class Meeting(models.Model):
     department = models.ForeignKey(Department, verbose_name = "จังหวัด", on_delete=models.CASCADE, related_name='meetings')
@@ -101,4 +97,45 @@ class Meeting(models.Model):
             return "-"
     
 
+class Command(models.Model):
+    department = models.ForeignKey(Department, verbose_name="จังหวัด", on_delete=models.CASCADE, related_name='commands')
+    name = models.CharField(verbose_name="ชื่อคำสั่ง", max_length=200, blank=False, null=True)
+    number = models.IntegerField(verbose_name="เลขที่คำสั่ง")
+    year = models.IntegerField(verbose_name="ปี", 
+                                    validators=[MinValueValidator(2550, message="ปีต้องไม่ต่ำกว่า 2550"),
+                                                MaxValueValidator(2580, message="ปีต้องไม่เกิน 2580"),], 
+                                    default=(date.today().year+543))
+    assignment_date = models.DateField(verbose_name="ลงวันที่", blank=True, null=True)
+    expiration_date = models.DateField(verbose_name="วันที่ครบวาระ", blank=True, null=True)
+    file = models.FileField(verbose_name="ไฟล์", upload_to='command_files/', blank=True, null=True)
+
+    class Meta:
+        verbose_name = verbose_name_plural = '5. คำสั่ง'
+        ordering = ['year', 'number']
+
+    def __str__(self):
+        return f"{self.number}/{self.year%100} ลงวันที่ {self.assignment_date.day}-{self.assignment_date.month}-{self.assignment_date.year+543}"
     
+    def year_number(self):
+        return f"{self.number}/{self.year%100}"
+
+
+class CommitteeMember(models.Model):
+    ACTIVE_STATUS_CHOICES = [
+        ('A', 'Active'),
+        ('E', 'Expired'),
+    ]
+    command = models.ForeignKey(Command, verbose_name="คำสั่ง", on_delete=models.CASCADE, related_name='committee_members')
+    full_name = models.CharField(verbose_name="ชื่อ-สกุล", max_length=120)
+    position = models.CharField(verbose_name="ตำแหน่ง", max_length=150)
+    status = models.CharField(verbose_name="สถานะ", max_length=10, choices=ACTIVE_STATUS_CHOICES, default='active')
+    comment = models.TextField(verbose_name="หมายเหตุ", blank=True, null=True)
+
+    objects = models.Manager()
+    
+    class Meta:
+        verbose_name = verbose_name_plural = '6. กรรมการ'
+        ordering = ['command__year', 'command__number', 'full_name']
+
+    def __str__(self):
+        return f"{self.full_name} - {self.position}"

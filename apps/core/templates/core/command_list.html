@@ -1,0 +1,179 @@
+{% extends "_base.html" %}
+{% load i18n thaidate %}
+{% block title %}รายการสำนักและคำสั่งทั้งหมด{% endblock %}
+
+{% block script %}
+    <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+{% endblock %}
+
+
+{% block content %}
+<h3 class="text-primary">รายการคำสั่งตามสำนัก</h3>
+
+<div class="row mt-4">
+    <div class="col-6 ms-auto">
+        <form class="d-flex align-items-center" method="GET">
+            <input type="text" name="section" class="form-control me-2" list="sectionList" placeholder="ค้นหา ลำดับ สำนัก" aria-label="Search" value="{{ request.GET.section|default_if_none:"" }}">
+            <datalist id="sectionList">
+                {% for section in all_sections %}
+                    <option value="{{ section.name }}">
+                {% endfor %}
+            </datalist>
+
+            <input type="text" name="q" class="form-control me-2" placeholder="ค้นหา จังหวัด" aria-label="Search" value="{{ request.GET.q|default_if_none:"" }}" list="provinceOptions">
+            <datalist id="provinceOptions">
+                {% for department in all_departments %}
+                    <option value="{{ department.province }}">
+                {% endfor %}
+            </datalist>
+
+            <select class="form-select me-2" aria-label="Select Year" length="6" name="year">
+                <option value="all" {% if request.GET.year == "all" or not request.GET.year %}selected{% endif %}>ทุกปี</option>
+                {% for year in available_years %}
+                    <option value="{{ year }}" {% if request.GET.year == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>
+                {% endfor %}
+            </select>
+
+            <button class="btn btn-primary ms-2 d-inline-flex" type="submit">
+                <i class="bi bi-search me-2"></i> กรอง
+            </button>
+
+            <a href="#?q={{ request.GET.q|default_if_none:"" }}&section={{ request.GET.section|default_if_none:"" }}&year={{ request.GET.year|default_if_none:"" }}&export=excel" 
+                class="btn btn-success ms-2  d-inline-flex">
+                <i class="bi bi-file-earmark-excel-fill me-2"></i> Excel
+            </a>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive mt-2">
+    {% for section in sections %}
+        <table class="table table-bordered table-hover">
+            <colgroup>
+                <col style="width: 8%">
+                <col style="width: 30%">
+                <col style="width: 12%">
+                <col style="width: 5%">
+                <col style="width: 10%">
+                <col style="width: 5%">
+                <col style="width: 10%">
+            </colgroup>
+            <tr class="table-primary mt-3">
+                <th colspan="6" class="text-start">{{ section.name }}</th>
+                <th class="text-end">
+                    <a href="{% url 'admin:core_department_change' section.id %}" type="button" class="btn btn-sm btn-outline-primary" ><i class="bi bi-plus"></i> เพิ่มคำสั่ง</a>
+                </th>
+            </tr>
+            {% for command in section.commands %}
+                <tr class="text-start">
+                    <td class="text-start ps-2">{{ command.department.province }}</td>
+                    <td class="text-start ps-2">{{ command.name }}</td>
+                    <td class="text-start">
+                        {{ command.year_number }} ลงวันที่ 
+                        {% if command.assignment_date %}
+                            {% language 'th' %}{{ command.assignment_date|thaidate:"d M y" }}{% endlanguage %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if command.expiration_date %}
+                            {% language 'th' %}
+                                {{ command.expiration_date|thaidate:"d M y" }}
+                            {% endlanguage %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td class="text-start">
+                        {% if command.file %}
+                            <a href="{{ command.file.url }}" target="_blank">
+                                <i class="bi bi-file-earmark-text"></i> 
+                                {{ command.file.size|filesizeformat }}
+                            </a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    
+                    <td></td>
+                    
+                    <td>
+                        <div class="d-flex justify-content-center">
+                        <button type="button" class="btn btn-sm btn-outline-primary me-2" 
+                                    hx-get="{% url 'core:committee-members-list' command.id %}"
+                                    hx-target="#committee-members-list"
+                                    hx-swap="innerHTML"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#infoModal"                                     
+                                    >
+                                    <i class="bi bi-people-fill"></i> คกก. {{ command.committee_members.count }}
+                        </button>
+                        {% if request.user.is_superuser %}
+                            <a type="button" class="btn btn-sm btn-outline-warning" href="/admin/core/command/{{ command.id }}/change/" target="_blank">
+                                <i class="bi bi-pencil-square"></i> แก้ไข
+                            </a>
+                        {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endfor %}
+
+    <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="infoModalLabel">คำสั่ง 123415</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="committee-members-list">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Position</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">1</th>
+                                <td>John Doe</td>
+                                <td>Manager</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">2</th>
+                                <td>Jane Smith</td>
+                                <td>Developer</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">3</th>
+                                <td>Mike Johnson</td>
+                                <td>Designer</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">4</th>
+                                <td>Emily Brown</td>
+                                <td>Tester</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">5</th>
+                                <td>Chris Lee</td>
+                                <td>Analyst</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+{% endblock %}

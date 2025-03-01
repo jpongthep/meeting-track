@@ -4,7 +4,7 @@ from django.utils.html import format_html
 from django.templatetags.static import static
 from django.db.models import Q
 
-from .models import Section, Department, FiscalObjective, Meeting
+from .models import Section, Department, FiscalObjective, Meeting, Command, CommitteeMember
 
 
 admin.site.site_header = "Organization Meeting Tracker Admin"
@@ -64,14 +64,34 @@ class MainSubSectionFilter(admin.SimpleListFilter):
         if value == 'main':
             return queryset.exclude(section__name__contains='สาขา')
         return queryset
+
+
+class CommandInline(admin.TabularInline):
+    model = Command
+    fields = ('name', 'number', 'year', 'assignment_date', 'expiration_date', 'num_committee_members')
+    readonly_fields = ('num_committee_members',)
+    extra = 0
+    
+    def num_committee_members(self, obj):
+        url = reverse("admin:core_command_change", args=[obj.id])
+        param = "?q={}".format(obj.department.province)
+        return format_html('<a href="{}" title="Edit" target="_blank" class="button">👥 กรรมการ {}</a>', url + param, obj.committee_members.count())
+
+    num_committee_members.short_description = 'จำนวนกรรมการ'
     
     
 @admin.register(Department)
 class DepartmentAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'section', 'province', 'responsible', 'contact_name', 'phone')
+    list_display = ('__str__', 'section', 'province', 'responsible', 'num_commands',)
     list_display_links = ('__str__', 'section')
-    search_fields = ('section__name', 'province', 'responsible', 'contact_name', 'phone')
+    search_fields = ('section__name', 'province', 'responsible',)
     list_filter = (MainSubSectionFilter, 'section__number',)
+    inlines = [CommandInline]
+    raw_id_fields = ('section',)
+    
+    def num_commands(self, obj):
+        return obj.commands.count()
+    num_commands.short_description = 'จำนวนคำสั่ง'
 
 
 @admin.register(FiscalObjective)
@@ -172,3 +192,60 @@ class MeetingAdmin(admin.ModelAdmin):
         return "❌ no file"
     is_send_report.allow_tags = True   
     is_send_report.short_description = 'รายงานการประชุม'
+    
+
+from django.contrib import admin
+from django.core.validators import MinValueValidator, MaxValueValidator
+from .models import Command, CommitteeMember
+from datetime import date
+
+class CommiteeInline(admin.TabularInline):
+    model = CommitteeMember
+    fields = ('full_name', 'position', 'status',)
+    extra = 0
+
+
+@admin.register(Command)
+class CommandAdmin(admin.ModelAdmin):
+    list_display = ('department','name', 'number', 'year',  'assignment_date', 'expiration_date')
+    list_display_links = ('department', 'name')
+    list_filter = ('department', 'year')
+    search_fields = ('name', 'department__province')
+    date_hierarchy = 'assignment_date'
+    ordering = ('year', 'number')
+    save_as = True
+    inlines = [CommiteeInline]
+    raw_id_fields = ('department',)
+    
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    # fieldsets = (
+    #     (None, {
+    #         'fields': ('department', 'name', 'number', 'year', 'assignment_date', 'expiration_date', 'file')
+    #     }),
+    # )
+
+    # def get_form(self, request, obj=None, **kwargs):
+    #     form = super().get_form(request, obj, **kwargs)
+    #     form.base_fields['year'].validators = [
+    #         MinValueValidator(2550, message="ปีต้องไม่ต่ำกว่า 2550"),
+    #         MaxValueValidator(2580, message="ปีต้องไม่เกิน 2580"),
+    #     ]
+    #     form.base_fields['year'].initial = date.today().year + 543
+    #     return form
+
+@admin.register(CommitteeMember)
+class CommitteeMemberAdmin(admin.ModelAdmin):
+    list_display = ('command', 'full_name', 'position', 'status')
+    list_display_links = ('full_name',)
+    list_filter = ('status',)
+    search_fields = ('full_name', 'command__department__province',)
+    ordering = ('command__year', 'command__number', 'full_name')
+    raw_id_fields = ('command',)
+
+    # fieldsets = (
+    #     (None, {
+    #         'fields': ('command', 'full_name', 'position', 'status', 'comment')
+    #     }),
+    # )

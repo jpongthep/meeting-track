@@ -1,0 +1,40 @@
+.table thead th {
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+    vertical-align: middle;
+}
+.table td, .table th {
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+.text-left {
+    text-align: left !important;
+}
+.text-right {
+    text-align: right !important;
+}
+.table-responsive {
+    overflow-x: auto;
+}
+a:link {
+    text-decoration: none;
+}
+[name="year"] {
+    width: 100px;
+}
+.status-dot {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.status-active {
+    background-color: green;
+    color: green;
+}
+.status-inactive {
+    background-color: yellow;
+    color: yellow;
+}

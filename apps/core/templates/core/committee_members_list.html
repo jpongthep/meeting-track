@@ -1,0 +1,29 @@
+<h5 class="modal-title" hx-swap-oob="true" id="infoModalLabel">
+    {{ command }}
+</h5>
+
+<!-- committee_members_list.html -->
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col" class="text-start">ชื่อ - นามสกุล</th>
+            <th scope="col" class="text-start">ตำแหน่ง</th>
+            <th scope="col">สถานะ</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for member in committee_members %}
+        <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td class="text-start">{{ member.full_name }}</td>
+            <td class="text-start">{{ member.position }}</td>
+            <td>{{ member.get_status_display }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3" class="text-center">ไม่พบรายชื่อคณะกรรมการ</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

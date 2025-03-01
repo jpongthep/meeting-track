@@ -1,0 +1,16 @@
+<nav class="navbar navbar-expand-lg navbar-light mb-3 mt-0" style="background-color: #e3f2fd;">
+    <div class="container-fluid p-0">
+        <div class="navbar-nav ">
+            {% with request.resolver_match.app_names.0|add:request.resolver_match.url_name as url_name %}   
+                <a class="nav-link {% if url_name == "corehome" %}active{% endif %}" href="{% url 'core:home' %}" aria-current="page" href="#">Home</a>
+                <a class="nav-link {% if url_name == "nationmeeting-list" %}active{% endif %}" href="{% url 'nation:meeting-list' %}" aria-current="page" href="#">คนช.</a>
+                <a class="nav-link {% if url_name == "coremeeting-list" %}active{% endif %}" href="{% url 'core:meeting-list' %}?year=68">การประชุม คปจ.</a>
+                <a class="nav-link {% if url_name == "corecommand-list" %}active{% endif %}" href="{% url 'core:command-list' %}">คำสั่ง คปจ.
+                </a>              
+            {% endwith %}
+        </div>
+        <a type="button" class="btn btn-sm btn-outline-primary me-2" href="{% url 'admin:index' %}" target="_blank">
+            <i class="bi bi-gear "></i>
+        </a>
+    </div>
+</nav>

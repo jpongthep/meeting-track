@@ -7,7 +7,7 @@ SECRET_KEY = '5d7(@jangh9&ia*z7uv-@dkwfre-uteo-il*gf8d@q=ftdbpv!s(&nsecujhi!iw+#
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 INSTALLED_APPS = [
@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     
     'apps.configs',
     'apps.core',
+    'apps.nation',
 ]
 
 MIDDLEWARE = [
@@ -39,7 +40,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'resources' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,8 +76,11 @@ USE_TZ = True  # Keep this enabled to use timezone-aware datetimes
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = 'static/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'resources', 'media')
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "resources", "static")]
+
 MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'resources', 'media')
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

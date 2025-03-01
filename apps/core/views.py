@@ -5,8 +5,7 @@ from django.http import HttpResponse
 from django.db.models import Q, Max
 from django.conf import settings
 
-from apps.core.models import Department, Meeting, FiscalObjective
-from apps.configs.models import Config
+from apps.core.models import Department, Meeting, FiscalObjective, Section, Command, CommitteeMember
 
 import openpyxl
 from openpyxl.utils import get_column_letter
@@ -30,7 +29,7 @@ def thai_date(date_obj):
     return f"{day} {month} {year%100}"
 
 
-def summary(request):
+def meeting_list(request):
     
     departments = Department.objects.all().order_by("section__type", "section__number")
     meetings = Meeting.objects.select_related('department', 'department__section').all().order_by("department__section__type", "department__section__number")
@@ -73,7 +72,7 @@ def summary(request):
         'meetings_summary': meeting_summary,
         'total': sum(meeting_summary),
     }
-    return render(request, 'core/summary.html', context)
+    return render(request, 'core/meeting_list.html', context)
 
 
 def export_meetings(request):
@@ -159,3 +158,25 @@ def export_meetings(request):
     wb.save(response)
 
     return response
+
+
+def command_list(request):
+    sections = Section.objects.all()
+    if request.GET.get('section'):
+        sections = sections.filter(name__contains=request.GET.get('section'))
+        if request.GET.get('section').isnumeric():
+            sections = sections.filter(number=request.GET.get('section'))
+    if request.GET.get('q'):
+        sections = sections.filter(departments__province__contains=request.GET.get('q'))
+    
+    for section in sections:
+        section.commands = Command.objects.filter(department__section=section).order_by('department_id', '-year', 'number')    
+    return render(request, 'core/command_list.html', {'sections': sections})
+
+
+def committee_members_list(request, command_id):
+    command = Command.objects.get(id=command_id)
+    committee_members = CommitteeMember.objects.filter(command_id=command_id).order_by('id')
+
+    # Render the template with the committee members
+    return render(request, 'core/committee_members_list.html', {'command' : command, 'committee_members': committee_members})
